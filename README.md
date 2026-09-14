@@ -1,3 +1,4 @@
+
 # College Alumni Connect
 
 ## Project Overview
@@ -76,3 +77,7 @@ The system provides a centralized space for alumni networking, mentorship, job a
 ## Future Enhancements
 
 Additional features such as advanced notifications, Q&A, alumni verification workflows, and improved search capabilities may be considered in future versions.
+
+# Alumni-Connect
+A full-stack platform connecting college students, alumni, faculty, and administrators for mentorship, career opportunities, events, and networking.
+
