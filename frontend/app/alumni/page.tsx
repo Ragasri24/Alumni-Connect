@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 type Alumni = {
   alumni_id: number;
@@ -384,10 +385,11 @@ export default function AlumniPage() {
       {/* Alumni Cards */}
       <div className="mt-8 grid grid-cols-3 gap-6">
         {filteredAlumni.map((person) => (
-          <div
-            key={person.alumni_id}
-            className="rounded-xl bg-white p-6 shadow"
-          >
+          <Link
+  href={`/alumni/${person.alumni_id}`}
+  key={person.alumni_id}
+  className="block rounded-xl bg-white p-6 shadow transition hover:shadow-lg"
+>
             <h2 className="text-xl font-bold">
               {person.name}
             </h2>
@@ -415,7 +417,7 @@ export default function AlumniPage() {
             <p className="mt-2 text-sm text-gray-600">
               Skills: {person.skills}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
 
