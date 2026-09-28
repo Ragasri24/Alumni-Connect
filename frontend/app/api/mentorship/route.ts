@@ -13,6 +13,24 @@ export async function POST(request: Request) {
       );
     }
 
+    const existingRequest = await pool.query(
+  `
+  SELECT request_id
+  FROM mentorship_requests
+  WHERE student_id = $1
+    AND alumni_id = $2
+    AND status = 'PENDING'
+  `,
+  [student_id, alumni_id]
+);
+
+if (existingRequest.rows.length > 0) {
+  return Response.json(
+    { error: "You already have a pending mentorship request with this alumni" },
+    { status: 409 }
+  );
+}
+
     const result = await pool.query(
       `
       INSERT INTO mentorship_requests
