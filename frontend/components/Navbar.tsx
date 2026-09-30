@@ -24,12 +24,25 @@ export default function Navbar() {
           Alumni
         </a>
 
-        <a
-          href="/mentorship"
-          className="rounded-lg px-4 py-3 hover:bg-gray-800"
-        >
-          Mentorship
-        </a>
+        <div className="flex flex-col gap-1">
+  <p className="px-4 py-2 font-medium">
+    Mentorship
+  </p>
+
+  <a
+    href="/mentorship"
+    className="rounded-lg px-6 py-2 text-sm hover:bg-gray-800"
+  >
+    Find a Mentor
+  </a>
+
+  <a
+    href="/mentorship/requests"
+    className="rounded-lg px-6 py-2 text-sm hover:bg-gray-800"
+  >
+    My Requests
+  </a>
+</div>
 
         <a
           href="/jobs"

@@ -40,15 +40,17 @@ export default function MentorshipPage() {
   return (
     <main className="ml-64 min-h-screen bg-gray-50 p-10">
 
+      {/* Page Header */}
+
       <h1 className="text-3xl font-bold">
-        Mentorship
+        Find a Mentor
       </h1>
 
       <p className="mt-2 text-gray-600">
         Connect with alumni who are willing to guide and mentor students.
       </p>
 
-      {/* Available Mentors */}
+      {/* Alumni Willing to Mentor */}
 
       <section className="mt-10">
 
@@ -89,7 +91,10 @@ export default function MentorshipPage() {
                   {mentor.location}
                 </p>
 
+                {/* Skills */}
+
                 <div className="mt-4 flex flex-wrap gap-2">
+
                   {mentor.skills
                     .split(",")
                     .map((skill) => (
@@ -100,7 +105,10 @@ export default function MentorshipPage() {
                         {skill.trim()}
                       </span>
                     ))}
+
                 </div>
+
+                {/* Buttons */}
 
                 <div className="mt-6 flex gap-3">
 
