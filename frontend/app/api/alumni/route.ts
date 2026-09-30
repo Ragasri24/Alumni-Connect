@@ -12,6 +12,7 @@ export async function GET() {
         a.location,
         a.skills,
         a.linkedin,
+        a.mentorship_available,
         d.dept_id,
         d.dept_name
       FROM alumni a

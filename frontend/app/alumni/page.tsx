@@ -12,6 +12,7 @@ type Alumni = {
   location: string;
   skills: string;
   linkedin: string;
+  mentorship_available: boolean;
   dept_id: number;
   dept_name: string;
 };
