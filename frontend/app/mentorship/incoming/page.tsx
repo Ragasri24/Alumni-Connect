@@ -22,6 +22,7 @@ type IncomingRequest = {
 export default function IncomingMentorshipPage() {
   const [requests, setRequests] = useState<IncomingRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [responding, setResponding] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchRequests() {
@@ -39,6 +40,50 @@ export default function IncomingMentorshipPage() {
 
     fetchRequests();
   }, []);
+
+  async function respondToRequest(
+    requestId: number,
+    status: "ACCEPTED" | "REJECTED"
+  ) {
+    setResponding(requestId);
+
+    try {
+      const response = await fetch("/api/mentorship/respond", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          request_id: requestId,
+          status: status,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || "Failed to respond to request");
+        return;
+      }
+
+      setRequests((currentRequests) =>
+        currentRequests.map((request) =>
+          request.request_id === requestId
+            ? {
+                ...request,
+                status: status,
+                responded_at: data.request.responded_at,
+              }
+            : request
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong");
+    } finally {
+      setResponding(null);
+    }
+  }
 
   return (
     <main className="ml-64 min-h-screen bg-gray-50 p-10">
@@ -88,7 +133,15 @@ export default function IncomingMentorshipPage() {
 
                 </div>
 
-                <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-700">
+                <span
+                  className={`rounded-full px-3 py-1 text-sm font-medium ${
+                    request.status === "PENDING"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : request.status === "ACCEPTED"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
                   {request.status}
                 </span>
 
@@ -149,7 +202,52 @@ export default function IncomingMentorshipPage() {
                 {new Date(request.created_at).toLocaleDateString()}
               </p>
 
-              {/* Buttons will be added next */}
+              {/* Response Date */}
+
+              {request.responded_at && (
+                <p className="mt-2 text-sm text-gray-500">
+                  Responded on{" "}
+                  {new Date(request.responded_at).toLocaleDateString()}
+                </p>
+              )}
+
+              {/* Accept / Reject Buttons */}
+
+              {request.status === "PENDING" && (
+                <div className="mt-6 flex gap-3">
+
+                  <button
+                    onClick={() =>
+                      respondToRequest(
+                        request.request_id,
+                        "ACCEPTED"
+                      )
+                    }
+                    disabled={responding === request.request_id}
+                    className="rounded-lg bg-green-600 px-5 py-2 font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {responding === request.request_id
+                      ? "Processing..."
+                      : "Accept"}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      respondToRequest(
+                        request.request_id,
+                        "REJECTED"
+                      )
+                    }
+                    disabled={responding === request.request_id}
+                    className="rounded-lg bg-red-600 px-5 py-2 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {responding === request.request_id
+                      ? "Processing..."
+                      : "Reject"}
+                  </button>
+
+                </div>
+              )}
 
             </div>
           ))}
