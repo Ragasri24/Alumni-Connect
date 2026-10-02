@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type Alumni = {
   alumni_id: number;
@@ -116,13 +117,12 @@ if (!alumni) {
     <main className="ml-64 min-h-screen bg-gray-100 p-10">
 
       {/* Back Button */}
-      <button
-        onClick={() => window.history.back()}
-        className="mb-6 text-gray-600 hover:text-gray-900"
-      >
-        ← Back to Alumni
-      </button>
-
+      <Link
+  href="/alumni"
+  className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+>
+  ← Back to Alumni
+</Link>
       {/* Profile Header */}
       <div className="rounded-xl bg-white p-8 shadow">
 
