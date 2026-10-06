@@ -1,4 +1,3 @@
-
 # College Alumni Connect
 
 ## Project Overview
@@ -32,17 +31,20 @@ The system provides a centralized space for alumni networking, mentorship, job a
 * Share professional information
 * Accept or reject mentorship requests
 * Post jobs and internships
-* Participate in college events
+* Accept or reject event speaker invitations
+* Participate in college events as invited speakers
 
 ### Faculty
 
 * Manage profile
 * View alumni information
 * Create and manage events
+* Invite alumni as event speakers
 
 ### Admin
 
 * Manage users
+* View platform statistics
 * Manage jobs and internships
 * Manage events
 * Manage the overall platform
@@ -50,6 +52,7 @@ The system provides a centralized space for alumni networking, mentorship, job a
 ## Main Modules
 
 * Authentication
+* Role-Based Access Control
 * Student Management
 * Alumni Management
 * Faculty Management
@@ -60,24 +63,32 @@ The system provides a centralized space for alumni networking, mentorship, job a
 * Events
 * Event Registration
 
-## Planned Technology Stack
+## Technology Stack
 
 * Frontend: Next.js, TypeScript, Tailwind CSS
+* Backend: Next.js API Routes
 * Database: PostgreSQL
-* Backend/Services: Supabase
-* Authentication: Supabase Auth
+* Database Driver: node-postgres (`pg`)
+* Authentication: Custom session-based authentication
+* Password Hashing: bcrypt
 * Charts: Recharts
 * Version Control: Git & GitHub
 * Deployment: Vercel
 
-## Project Status
+## Project Structure
 
-🚧 Currently in the planning and database design phase.
-
-## Future Enhancements
-
-Additional features such as advanced notifications, Q&A, alumni verification workflows, and improved search capabilities may be considered in future versions.
-
-# Alumni-Connect
-A full-stack platform connecting college students, alumni, faculty, and administrators for mentorship, career opportunities, events, and networking.
-
+```text
+alumni-connect-db/
+├── README.md
+├── docs/
+│   ├── database-design.md
+│   ├── er-diagram.md
+│   └── project-requirements.md
+├── database/
+│   └── schema.sql
+└── frontend/
+    ├── app/
+    ├── lib/
+    ├── public/
+    ├── package.json
+    └── ...
