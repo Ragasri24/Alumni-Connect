@@ -19,6 +19,7 @@ CREATE TABLE students (
     email VARCHAR(150) UNIQUE NOT NULL,
     batch INT NOT NULL,
     section VARCHAR(10),
+    password_hash VARCHAR(255),
 
     FOREIGN KEY (dept_id)
         REFERENCES departments(dept_id)
@@ -42,6 +43,8 @@ CREATE TABLE alumni (
     linkedin VARCHAR(255),
     past_job_roles TEXT,
     events_attended INT DEFAULT 0,
+    mentorship_available BOOLEAN DEFAULT FALSE,
+    password_hash VARCHAR(255),
 
     FOREIGN KEY (dept_id)
         REFERENCES departments(dept_id)
@@ -55,6 +58,7 @@ CREATE TABLE faculty (
     dept_id INT NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     gender VARCHAR(20),
+    password_hash VARCHAR(255),
 
     FOREIGN KEY (dept_id)
         REFERENCES departments(dept_id)
@@ -68,6 +72,17 @@ CREATE TABLE admin (
 );
 
 -- 6. Mentorship Requests
+CREATE TABLE auth_sessions (
+    session_id VARCHAR(255) PRIMARY KEY,
+    user_id INT NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CHECK (role IN ('STUDENT', 'ALUMNI', 'FACULTY', 'ADMIN'))
+);
+
+-- 7. Mentorship Requests
 CREATE TABLE mentorship_requests (
     request_id SERIAL PRIMARY KEY,
     student_id INT NOT NULL,
@@ -84,7 +99,7 @@ CREATE TABLE mentorship_requests (
         REFERENCES alumni(alumni_id)
 );
 
--- 7. Jobs
+-- 8. Jobs
 CREATE TABLE jobs (
     job_id SERIAL PRIMARY KEY,
     alumni_id INT NOT NULL,
@@ -101,7 +116,7 @@ CREATE TABLE jobs (
         REFERENCES alumni(alumni_id)
 );
 
--- 8. Job Applications
+-- 9. Job Applications
 CREATE TABLE job_applications (
     application_id SERIAL PRIMARY KEY,
     job_id INT NOT NULL,
@@ -116,7 +131,7 @@ CREATE TABLE job_applications (
         REFERENCES students(student_id)
 );
 
--- 9. Events
+-- 10. Events
 CREATE TABLE events (
     event_id SERIAL PRIMARY KEY,
     title VARCHAR(150) NOT NULL,
@@ -133,7 +148,7 @@ CREATE TABLE events (
         REFERENCES faculty(faculty_id)
 );
 
--- 10. Event Alumni Requests
+-- 11. Event Alumni Requests
 CREATE TABLE event_alumni_requests (
     request_id SERIAL PRIMARY KEY,
     event_id INT NOT NULL,
@@ -149,7 +164,7 @@ CREATE TABLE event_alumni_requests (
         REFERENCES alumni(alumni_id)
 );
 
--- 11. Event Registrations
+-- 12. Event Registrations
 CREATE TABLE event_registrations (
     registration_id SERIAL PRIMARY KEY,
     event_id INT NOT NULL,
