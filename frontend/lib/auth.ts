@@ -66,6 +66,28 @@ export async function getSession() {
   return result.rows[0];
 }
 
+export async function requireAuth() {
+  const session = await getSession();
+
+  if (!session) {
+    throw new Error("UNAUTHORIZED");
+  }
+
+  return session;
+}
+
+export async function requireRole(
+  allowedRoles: Array<"STUDENT" | "ALUMNI" | "FACULTY" | "ADMIN">
+) {
+  const session = await requireAuth();
+
+  if (!allowedRoles.includes(session.role)) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return session;
+}
+
 export async function deleteSession() {
   const cookieStore = await cookies();
 
