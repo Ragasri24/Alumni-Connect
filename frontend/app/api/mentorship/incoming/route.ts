@@ -1,9 +1,10 @@
+
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function GET() {
   try {
-    // Temporary alumni ID until authentication is implemented
-    const alumniId = 1;
+    const session = await requireRole(["ALUMNI"]);
 
     const result = await pool.query(
       `
@@ -36,12 +37,26 @@ export async function GET() {
 
       ORDER BY mr.created_at DESC
       `,
-      [alumniId]
+      [session.user_id]
     );
 
     return Response.json(result.rows);
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
 
     return Response.json(
       { error: "Failed to fetch incoming mentorship requests" },
