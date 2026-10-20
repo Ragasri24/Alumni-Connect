@@ -1,35 +1,41 @@
+
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    const session = await requireRole(["STUDENT"]);
     const body = await request.json();
 
-    const { student_id, alumni_id, message } = body;
+    const { alumni_id, message } = body;
 
-    if (!student_id || !alumni_id || !message) {
+    if (!alumni_id || !message) {
       return Response.json(
-        { error: "Student, alumni, and message are required" },
+        { error: "Alumni and message are required" },
         { status: 400 }
       );
     }
 
     const existingRequest = await pool.query(
-  `
-  SELECT request_id
-  FROM mentorship_requests
-  WHERE student_id = $1
-    AND alumni_id = $2
-    AND status = 'PENDING'
-  `,
-  [student_id, alumni_id]
-);
+      `
+      SELECT request_id
+      FROM mentorship_requests
+      WHERE student_id = $1
+        AND alumni_id = $2
+        AND status = 'PENDING'
+      `,
+      [session.user_id, alumni_id]
+    );
 
-if (existingRequest.rows.length > 0) {
-  return Response.json(
-    { error: "You already have a pending mentorship request with this alumni" },
-    { status: 409 }
-  );
-}
+    if (existingRequest.rows.length > 0) {
+      return Response.json(
+        {
+          error:
+            "You already have a pending mentorship request with this alumni",
+        },
+        { status: 409 }
+      );
+    }
 
     const result = await pool.query(
       `
@@ -39,7 +45,7 @@ if (existingRequest.rows.length > 0) {
         ($1, $2, $3)
       RETURNING *
       `,
-      [student_id, alumni_id, message]
+      [session.user_id, alumni_id, message]
     );
 
     return Response.json(
@@ -51,6 +57,17 @@ if (existingRequest.rows.length > 0) {
     );
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json({ error: "Access denied" }, { status: 403 });
+    }
 
     return Response.json(
       { error: "Failed to send mentorship request" },
