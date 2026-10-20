@@ -1,7 +1,11 @@
+
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function PATCH(request: Request) {
   try {
+    const session = await requireRole(["ALUMNI"]);
+
     const body = await request.json();
 
     const { request_id, status } = body;
@@ -27,15 +31,16 @@ export async function PATCH(request: Request) {
         status = $1,
         responded_at = CURRENT_TIMESTAMP
       WHERE request_id = $2
+        AND alumni_id = $3
         AND status = 'PENDING'
       RETURNING *
       `,
-      [status, request_id]
+      [status, request_id, session.user_id]
     );
 
     if (result.rows.length === 0) {
       return Response.json(
-        { error: "Request not found or already responded to" },
+        { error: "Request not found, not assigned to you, or already responded to" },
         { status: 404 }
       );
     }
@@ -46,6 +51,20 @@ export async function PATCH(request: Request) {
     });
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
 
     return Response.json(
       { error: "Failed to respond to mentorship request" },
