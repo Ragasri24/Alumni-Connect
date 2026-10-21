@@ -1,4 +1,6 @@
+
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -13,15 +15,11 @@ export async function GET() {
         e.location,
         e.max_capacity,
         e.registration_deadline,
-
         f.faculty_id,
         f.name AS faculty_name
-
       FROM events e
-
       JOIN faculty f
         ON e.created_by = f.faculty_id
-
       ORDER BY e.start_time ASC
     `);
 
@@ -38,6 +36,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await requireRole(["FACULTY"]);
     const body = await request.json();
 
     const {
@@ -67,9 +66,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Temporary faculty ID until authentication is implemented
-    const facultyId = 1;
-
     const result = await pool.query(
       `
       INSERT INTO events
@@ -97,7 +93,7 @@ export async function POST(request: Request) {
         location,
         max_capacity,
         registration_deadline,
-        facultyId,
+        session.user_id,
       ]
     );
 
@@ -110,6 +106,20 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
 
     return Response.json(
       { error: "Failed to create event" },
