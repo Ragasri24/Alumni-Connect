@@ -1,9 +1,10 @@
+
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function GET() {
   try {
-    // Temporary student ID until authentication is implemented
-    const studentId = 1;
+    const session = await requireRole(["STUDENT"]);
 
     const result = await pool.query(
       `
@@ -17,12 +18,23 @@ export async function GET() {
       WHERE student_id = $1
       ORDER BY applied_at DESC
       `,
-      [studentId]
+      [session.user_id]
     );
 
     return Response.json(result.rows);
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json({ error: "Access denied" }, { status: 403 });
+    }
 
     return Response.json(
       { error: "Failed to fetch applications" },
@@ -33,8 +45,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await requireRole(["STUDENT"]);
     const body = await request.json();
-
     const { job_id } = body;
 
     if (!job_id) {
@@ -44,9 +56,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Temporary student ID until authentication is implemented
-    const studentId = 1;
-
     const existingApplication = await pool.query(
       `
       SELECT application_id
@@ -54,7 +63,7 @@ export async function POST(request: Request) {
       WHERE job_id = $1
         AND student_id = $2
       `,
-      [job_id, studentId]
+      [job_id, session.user_id]
     );
 
     if (existingApplication.rows.length > 0) {
@@ -72,7 +81,7 @@ export async function POST(request: Request) {
         ($1, $2, 'APPLIED')
       RETURNING *
       `,
-      [job_id, studentId]
+      [job_id, session.user_id]
     );
 
     return Response.json(
@@ -85,6 +94,17 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
 
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json({ error: "Access denied" }, { status: 403 });
+    }
+
     return Response.json(
       { error: "Failed to mark application" },
       { status: 500 }
@@ -94,8 +114,8 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const session = await requireRole(["STUDENT"]);
     const body = await request.json();
-
     const { job_id } = body;
 
     if (!job_id) {
@@ -105,9 +125,6 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Temporary student ID until authentication is implemented
-    const studentId = 1;
-
     const result = await pool.query(
       `
       DELETE FROM job_applications
@@ -115,7 +132,7 @@ export async function DELETE(request: Request) {
         AND student_id = $2
       RETURNING *
       `,
-      [job_id, studentId]
+      [job_id, session.user_id]
     );
 
     if (result.rows.length === 0) {
@@ -131,6 +148,17 @@ export async function DELETE(request: Request) {
     });
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json({ error: "Access denied" }, { status: 403 });
+    }
 
     return Response.json(
       { error: "Failed to remove application mark" },
