@@ -1,7 +1,10 @@
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function GET() {
   try {
+    await requireRole(["ADMIN"]);
+
     const statsResult = await pool.query(`
       SELECT
         (SELECT COUNT(*) FROM students)::int AS total_students,
@@ -52,6 +55,20 @@ export async function GET() {
       recentJobs: recentJobsResult.rows,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
     console.error(error);
 
     return Response.json(
