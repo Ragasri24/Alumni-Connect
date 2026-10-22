@@ -1,7 +1,10 @@
+
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function PATCH(request: Request) {
   try {
+    const session = await requireRole(["ALUMNI"]);
     const body = await request.json();
 
     const { request_id, status } = body;
@@ -20,9 +23,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Temporary alumni ID until authentication is implemented
-    const alumniId = 1;
-
     const result = await pool.query(
       `
       UPDATE event_alumni_requests
@@ -34,7 +34,7 @@ export async function PATCH(request: Request) {
         AND status = 'PENDING'
       RETURNING *
       `,
-      [status, request_id, alumniId]
+      [status, request_id, session.user_id]
     );
 
     if (result.rows.length === 0) {
@@ -50,6 +50,20 @@ export async function PATCH(request: Request) {
     });
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
 
     return Response.json(
       { error: "Failed to respond to speaker invitation" },
