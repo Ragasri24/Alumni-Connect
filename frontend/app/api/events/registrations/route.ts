@@ -1,9 +1,11 @@
+
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function GET() {
   try {
-    // Temporary student ID until authentication is implemented
-    const studentId = 1;
+    const session = await requireRole(["STUDENT"]);
+    const studentId = session.user_id;
 
     const result = await pool.query(
       `
@@ -13,19 +15,14 @@ export async function GET() {
         er.student_id,
         er.registered_at,
         er.attendance_status,
-
         e.title,
         e.start_time,
         e.end_time,
         e.location
-
       FROM event_registrations er
-
       JOIN events e
         ON er.event_id = e.event_id
-
       WHERE er.student_id = $1
-
       ORDER BY er.registered_at DESC
       `,
       [studentId]
@@ -34,6 +31,20 @@ export async function GET() {
     return Response.json(result.rows);
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
 
     return Response.json(
       { error: "Failed to fetch event registrations" },
@@ -44,8 +55,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const session = await requireRole(["STUDENT"]);
+    const studentId = session.user_id;
 
+    const body = await request.json();
     const { event_id } = body;
 
     if (!event_id) {
@@ -55,10 +68,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Temporary student ID until authentication is implemented
-    const studentId = 1;
-
-    // Check event and registration deadline
     const eventResult = await pool.query(
       `
       SELECT
@@ -80,7 +89,6 @@ export async function POST(request: Request) {
 
     const event = eventResult.rows[0];
 
-    // Check registration deadline
     const today = new Date();
     const deadline = new Date(event.registration_deadline);
 
@@ -91,7 +99,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check whether the student has already registered
     const existingRegistration = await pool.query(
       `
       SELECT registration_id
@@ -109,7 +116,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Count current registrations
     const countResult = await pool.query(
       `
       SELECT COUNT(*) AS registration_count
@@ -130,7 +136,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create registration
     const result = await pool.query(
       `
       INSERT INTO event_registrations
@@ -152,6 +157,20 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
 
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
+
     return Response.json(
       { error: "Failed to register for event" },
       { status: 500 }
@@ -161,8 +180,10 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const body = await request.json();
+    const session = await requireRole(["STUDENT"]);
+    const studentId = session.user_id;
 
+    const body = await request.json();
     const { event_id } = body;
 
     if (!event_id) {
@@ -171,9 +192,6 @@ export async function DELETE(request: Request) {
         { status: 400 }
       );
     }
-
-    // Temporary student ID until authentication is implemented
-    const studentId = 1;
 
     const result = await pool.query(
       `
@@ -198,6 +216,20 @@ export async function DELETE(request: Request) {
     });
   } catch (error) {
     console.error(error);
+
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
 
     return Response.json(
       { error: "Failed to cancel event registration" },
