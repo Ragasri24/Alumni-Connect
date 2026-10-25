@@ -7,10 +7,6 @@ type Alumni = {
   alumni_id: number;
   name: string;
   batch: number;
-  rollno: string;
-  section: string;
-  email: string;
-  gender: string;
   location: string;
   company: string;
   job_role: string;
@@ -157,67 +153,21 @@ if (!alumni) {
       <div className="mt-6 grid grid-cols-3 gap-6">
 
         {/* About */}
-        <div className="col-span-2 rounded-xl bg-white p-6 shadow">
+<div className="col-span-2 rounded-xl bg-white p-6 shadow">
+  <h2 className="text-2xl font-bold">
+    About
+  </h2>
 
-          <h2 className="text-2xl font-bold">
-            About
-          </h2>
+  <div className="mt-5">
+    <p className="text-sm text-gray-500">
+      Department
+    </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-5">
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Department
-              </p>
-
-              <p className="mt-1 font-medium">
-                {alumni.dept_name}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Roll Number
-              </p>
-
-              <p className="mt-1 font-medium">
-                {alumni.rollno}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Section
-              </p>
-
-              <p className="mt-1 font-medium">
-                {alumni.section}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Gender
-              </p>
-
-              <p className="mt-1 font-medium">
-                {alumni.gender}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">
-                Email
-              </p>
-
-              <p className="mt-1 font-medium">
-                {alumni.email}
-              </p>
-            </div>
-
-          </div>
-
-        </div>
+    <p className="mt-1 font-medium">
+      {alumni.dept_name}
+    </p>
+  </div>
+</div>
 
         {/* Career */}
         <div className="rounded-xl bg-white p-6 shadow">
