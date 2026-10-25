@@ -1,7 +1,10 @@
 import pool from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 export async function GET() {
   try {
+    await requireRole(["ADMIN"]);
+
     const students = await pool.query(`
       SELECT
         s.student_id AS id,
@@ -47,6 +50,20 @@ export async function GET() {
       ...faculty.rows,
     ]);
   } catch (error) {
+    if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return Response.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return Response.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
     console.error(error);
 
     return Response.json(
